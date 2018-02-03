@@ -1,0 +1,125 @@
+{% load staticfiles %}
+{% load rango_extras %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="http://getbootstrap.com/favicon.ico">
+    <title>Rango-{% block title %}hello tango {% endblock %}</title>
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://getbootstrap.com/docs/3.3/examples/dashboard/dashboard.css" rel="stylesheet">
+
+{#<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>#}
+
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+                  <a class="navbar-brand" href="/rango/">Rango</a>
+        </div>
+      <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+                <li><a href="{% url 'index' %}">Home</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'restricted' %}">Restricted Page</a></li>
+                        <li><a href="{% url 'logout' %}?next=/rango/">Logout</a></li>
+                        <li><a href="{% url 'add_cat' %}">Add a New Category</a></li>
+{#                        <li><a href="{% url 'category' %}">Add a New Category</a></li>#}
+                    {% else %}
+                        <li><a href="{% url 'register' %}">Register Here</a></li>
+                        <li><a href="{% url 'login' %}">Login</a></li>
+                    {% endif %}
+                                <li><a href="{% url 'abouts' %}">About</a></li>
+
+              </ul>
+        </div>
+      </div>
+    </div>
+{#<div class="navbar-inverse" >#}
+{#    <ul>#}
+{#        {% if user.is_authenticated %}#}
+{#            <h1> 用户{{ user.name }}#}
+{#            </h1>#}
+{#        <li><a href="/rango/restricted/">restricted page </a> </li>#}
+{#        <li><a href="{% url 'restricted' %}">restricted page </a> </li>#}
+{#        <li><a href="/rango/logout/">注销用户 </a> </li>#}
+{#        <li><a href="{% url 'logout' %}">注销用户 </a> </li>#}
+{#        <li><a href="/rango/add_cat/">添加一个目录 </a> </li>#}
+{#        <li><a href="{% url 'add_cat' %}">添加一个目录 </a> </li>#}
+{#        {% else %}#}
+{#            写好基础的url标签，不同的页面继承会有不同的效果#}
+{#            <li><a href="/rango/register/">注册</a> </li>#}
+{#            <li><a href="{% url 'register' %}">注册</a> </li>#}
+{#            <li><a href="/rango/login/">登录</a> </li>#}
+{#            <li><a href="{% url 'login' %}">登录</a> </li>#}
+{#        {% endif %}#}
+{#        <li><a href="/rango/about/">关于</a> </li>#}
+{#        <li><a href="{% url 'abouts' %}">关于</a> </li>#}
+{#    </ul>#}
+{#<a href="{% url 'index' %}"> 到主页面</a>#}
+{#</div>#}
+{#<div>#}
+
+
+       <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+        <ul class="nav nav-list">
+        <li class="nav-header">Find a Category</li>
+        <form>
+        <label></label>
+        <li><input  class="search-query span10" type="text" name="suggestion" value="" id="suggestion" /></li>
+        </form>
+</ul>
+
+<div id="cats">
+</div>
+                {% block side_block %}
+
+                    {% get_category_list category%}
+                {% endblock %}
+
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+           <div>
+                {% block body_block %}
+                {% endblock %}
+                </div>
+        </div>
+      </div>
+    </div>
+    <hr>
+    <footer>
+        <div class="container">
+            <p>&copy;山东大学 樊佳亮学习Django</p>
+        </div>
+    </footer>
+    </hr>
+
+{#{% block body_block %}#}
+{#    this is the default page#}
+{#{% endblock %}#}
+{#</div>#}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+    <script src="http://getbootstrap.com/assets/js/docs.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js"></script>
+    <script src="{% static "js/rango-ajax.js" %}"></script>
+    <script src="{% static "js/rango-jquery.js" %}"></script>
+</body>
+</html>

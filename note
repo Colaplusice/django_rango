@@ -1,0 +1,60 @@
+views 定义方法
+urls 指定链接地址 和链接地址所指向的方法，然后找到views中的方法 进行对应的操作
+views可以跳转到html 给html传递参数什么的，相当于事务的处理
+
+STATICFILES_DIRS =(
+    STATIC_PATH,
+)       建立在之前路径的基础上  相当于可以跳转到自己的路径?
+CharField－存储字符数据的字段(例如字符串).max_length提供了最大长度.
+URLField－和CharField一样,但是它存储资源的URL.你也可以使用max_length参数.
+IntegerField－存储整数.
+DateField－存储Python的datetime.date.
+
+
+ForeignKey－创建1对多关系的字段类型.
+OneToOneField－定义一个严格的1对1关系字段类型.
+ManyToManyFeild－当以多对多关系字段类型
+
+
+数据库API
+
+先建好slug模型,然后将 重写一个 save()方法，将对slug的save()加在方法中 ，同时继承原来的方法
+实现对其他数据的修改。
+
+思路整理下:从 index 开始  在网址打开index 匹配到urls.py 跳转到对应的index方法
+index方法 index方法从数据库把数据取出来， 发送跳转到index.html页面。
+在index.html中 将slug属性提取出来，包装为url 然后点击
+
+点击后 链接到urls.py 根据正则表达式找到对应的方法  跳转到category方法
+在category方法中  将属性从数据库取出来， 发送跳转到category.html
+在html中将 得到的url属性显示出来， 重定向到对应网站
+
+add page思路整理:
+1.在category页面添加 add_page 链接， 连接到/rango/category/{{ category_name_slug }}/add_page url 为cat
+name 下级的 add_page 页面， 也就是说 在add_page时，page必须有一个cat目录 否则 不显示add_page 链接
+
+2.点了add_page链接后 通过 url.py匹配到 对于的方法r'^category/(?P<cat_name_slug>[\w\w-]+)/add_page/$
+传递一个参数 cat_name_slug  匹配到add_page方法后 根据传递的参数 找到cat 属性 然后设置page的属性
+返回到 category()方法中 将page页面更新到 cat类中? 返回到category页面
+
+
+error:
+1.You called this URL via POST, but the URL doesn't end in a slash and you have APPEND_SLASH
+解决方案:action 地址错误
+2.   NoReverseMatch at /rango/category/python/
+
+
+页面继承:
+基础页面 写好模块
+继承的页面 再重写 继承的模块，其他内容不变
+
+错误信息：找不到url
+出错了
+
+
+自己写tag ： 写一个方法，在方法中得到数据库的所有标签， 然后将标签返回到一个自己写好的网页
+网页确定了  内容的输出形式， 然后在base页面规定好 他放的位置 是sidebar还是 center bar
+当然也可以传递参数
+
+//coverage 运行
+$ coverage run --source='.' manage.py test rango
