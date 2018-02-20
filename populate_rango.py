@@ -2,10 +2,9 @@
 import os
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "itcast_project.settings")
 import django
-
+from django.utils import timezone
 django.setup()
-
-from rango.models import Category,Page
+from rango.models import Category,Page,article
 
 
 def populate():
@@ -56,7 +55,17 @@ def add_cat(name):
         c.save()
     return c
 
+def newarticle():
+    article_cat=add_cat('articles')
+    print(timezone.now)
+    add_article('by sd','樊佳亮大三的大叔大婶多2爱仕达大撒所多爱仕达奥所多',
+                timezone.now(),views=int(2),cat=article_cat)
+def add_article(title,content,pub_date,views,cat):
+    c=article.objects.get_or_create(title=title,content=content,pub_date=pub_date,views=views,category=cat)[0]
+    c.save()
+    print('添加完成')
 if __name__ == '__main__':
     #脚本文件 自动往数据库写东西? 也没有很自动啊，就是方法的调用
     print('starting rango script')
-    populate()
+    # populate()
+    newarticle()

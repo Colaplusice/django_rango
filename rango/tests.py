@@ -11,7 +11,6 @@ class CategoryMethodTests(TestCase):
         cat=Category(name='test',views=-1,likes=0)
         cat.save()
         self.assertEqual((cat.views>=0),True)
-
     def test_slug_line_creation(self):
         cat=Category('Random Category String')
         cat.save()

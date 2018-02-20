@@ -16,3 +16,11 @@ $('#suggestion').keyup(function () {
             $('#cats').html(data)
         });
 })
+//键盘放上面就会触发的事件
+$('#changepage').click(function () {
+    var pagenum;
+    pagenum=$(this).attr('pagenum');
+            alert(pagenum)
+    $.get('/rango/index/',{pagenum:pagenum}
+    );
+})

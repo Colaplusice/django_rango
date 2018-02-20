@@ -1,7 +1,10 @@
 # coding=UTF-8
+import uuid
 from django.db import models
 from django.template.defaultfilters import slugify
 from django.contrib.auth.models import User
+from django.utils import timezone
+from DjangoUeditor.models import UEditorField
 # Create your models here.
 class Category(models.Model):
     name=models.CharField(max_length=128,unique=True)
@@ -33,4 +36,14 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.username
 
-
+class article(models.Model):
+    title=models.CharField(max_length=128,unique=True)
+    pub_date=models.DateTimeField(default=timezone.now)
+    content=models.TextField('内容')
+    views=models.IntegerField(default=0)
+    category=models.ForeignKey(Category)
+    slug=models.SlugField(unique=True)
+    class Meta:
+       ordering = ('-pub_date',)
+    def __unicode__(self):
+        return self.title

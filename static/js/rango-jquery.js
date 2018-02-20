@@ -9,6 +9,13 @@ $(document).ready(function() {
     $("#about-btn").click( function(event) {
         alert("You clicked the button using JQuery!");
     });
+    // $("#changepage").click( function(event) {
+    //     alert("You clicked the button using JQuery!");
+    // });
+
+
+
+
    //覆盖在 p上文字变红
    $("p").hover(function () {
         $(this).css('color','red');

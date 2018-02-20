@@ -5,15 +5,33 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render,redirect
 from django.http import HttpResponse,HttpResponseRedirect
 from django.contrib import auth
-from rango.models import Category,Page
+from rango.models import Category,Page,article
+from django.template.loader import get_template
 from  rango.forms import CatForm,PageForm,UserForm,UserProfileForm
 from bing_search import run_query
 # Create your views here.
-def index(request):
-    cat_list=Category.objects.order_by('-likes')[:5]
+def index(request,pagenum):
+    pagenum=str(pagenum)
+    pagenum=int(pagenum)
+    context_dict={}
+    if pagenum>0:
+     begin=5*(pagenum-1)
+     end=5*pagenum
+     #得到所有的文章 来计算需要几页
+     all_article=article.objects.count()
+     page=all_article/5
+     if all_article%5!=0:
+         page+=1
+     pages=[]
+     for i in range(1,page+1):
+         pages.append(i)
+     article_list = article.objects.order_by('-views')[begin:end]
+    else:
+        article_list = article.objects.order_by('-views')[:3]
+    cat_list = Category.objects.order_by('-likes')[:5]
     page_list=Page.objects.order_by('-views')[:5]
-    #得到cat和pag的信息
-    context_dict={'categories':cat_list,'pages':page_list}
+    #得到cat和page 和 article的信息
+    context_dict={'categories':cat_list,'pages':page_list,'articles':article_list,'page':pages}
    #得到session值
     visits=request.session.get('visit')
     if not visits:
@@ -33,6 +51,7 @@ def index(request):
         request.session['visit']=visits
     context_dict['visits']=visits
     response=render(request,'rango/index.html',context_dict)
+    return response
 #     # 得到cookie值 将cookies 值提取出来加在字典中 返回给html
 #     visits=int(request.COOKIES.get('visits','1'))
 #     reset_last_visit_time=False
@@ -55,6 +74,22 @@ def index(request):
 #         response.set_cookie('visits',visits)
     return response
 
+def index_1(request):
+    context_dict={}
+    all_article = article.objects.count()
+    page = all_article / 5
+    if all_article % 5 != 0:
+        page += 1
+    pages=[]
+    for i in range(1, page + 1):
+        pages.append(i)
+    article_list = article.objects.order_by('-views')[:3]
+    cat_list = Category.objects.order_by('-likes')[:5]
+    page_list = Page.objects.order_by('-views')[:5]
+    context_dict = {'categories': cat_list, 'pages': page_list, 'articles': article_list,'page':pages}
+    response = render(request, 'rango/index.html', context_dict)
+    return response
+
 def about(request):
     return render(request,'rango/about.html')
 def category(request,cat_name_slug):
@@ -70,7 +105,6 @@ def category(request,cat_name_slug):
             context_dict['query']=query
     try:
         category=Category.objects.get(slug=cat_name_slug)
-        print(category.views)
         category.views+=1
         category.save()
         #将所有的元素放在一个字典中
@@ -165,7 +199,7 @@ def Login(request):
         if user:
             if user.is_active:
                 auth.login(request,user)
-                return HttpResponseRedirect('/rango/index/')
+                return HttpResponseRedirect('/rango')
             else:
                 return HttpResponse('your rango account is disabled')
         else:
@@ -261,3 +295,23 @@ def auto_add_page(request):
             #add our results list to the template
             context_dict['pages']=pages
     return render(request,'rango/page_list.html',context_dict)
+
+def blog(request,blog_slug):
+    content_dict={}
+    contents=article.objects.get(slug=blog_slug)
+    content_dict['content']=contents.content
+    content_dict['title']=contents.title
+    content_dict['blog_slug']=contents.slug
+    cat_list=Category.objects.order_by('-likes')[:5]
+    content_dict['categories']=cat_list
+    return render(request,'rango/blog.html',content_dict)
+def change_page(request,pagenum):
+    begin=(int(pagenum)-1)*5
+    end=int (pagenum)*5
+    article_list=article.objects.order_by('-views')[begin:end]
+    cat_list = Category.objects.order_by('-likes')[:5]
+    page_list = Page.objects.order_by('-views')[:5]
+    # 得到cat和page 和 article的信息
+    context_dict = {'categories': cat_list, 'pages': page_list, 'articles': article_list}
+    response=render(request,'rango/index.html',context_dict)
+    return  response
