@@ -1,0 +1,6 @@
+include LICENSE
+include readme.md
+
+include r.txt
+recursive-include static *
+recursive-include templates *

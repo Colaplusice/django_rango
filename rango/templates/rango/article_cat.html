@@ -1,0 +1,49 @@
+{% extends 'rango/base.html' %}
+{% load staticfiles %} <!-- 模板标签加载静态文件路径 -->
+{% block title %}Index{% endblock %}
+{% block body_block %}
+    <!--END INFO SECTION-->
+            <div class="col-md-8 ">
+                {% if articles %}
+                {% for artice in articles %}
+                <div class="blog-post">
+                    <h2>{{ artice.title }}</h2>
+                    <h4>发表时间: {{ artice.pub_date }} </h4>
+                    <p>
+                    {{ artice.content | truncatechars:40}}
+                    </p>
+                    <a href="{% url 'blog' artice.slug %}" class="btn btn-default btn-lg ">更多 <i class="fa fa-angle-right"></i></a>
+                </div>
+                    {% endfor %}
+                    {% else %}
+                      <div class="blog-post">
+                    <h2>there is no articles</h2>
+                    <h4>发表于</a> date</h4>
+                    <p>
+                        没有文章
+                    </p>
+                    <a href="#" class="btn btn-default btn-lg ">Read More <i class="fa fa-angle-right"></i></a>
+                </div>
+                {% endif %}
+                <br />
+                <nav>
+                    <ul class="pagination">
+                        <li>
+                            <a href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% for i in page %}
+
+                        <li><a href="{% url 'index' %}{{ i }}">{{ i }} </a></li>
+                        {% endfor %}
+                        <li>
+                            <a href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+{% endblock %}

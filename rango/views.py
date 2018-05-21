@@ -10,9 +10,13 @@ from django.template.loader import get_template
 from  rango.forms import CatForm,PageForm,UserForm,UserProfileForm
 from bing_search import run_query
 # Create your views here.
-def index(request,pagenum):
-    pagenum=str(pagenum)
-    pagenum=int(pagenum)
+def index(request):
+    if request.GET.get('page_id') is None:
+        pagenum=1
+    else:
+        print(request.GET.get('page_id'))
+        pagenum=request.GET.get('page_id')
+        pagenum=int(pagenum)
     context_dict={}
     if pagenum>0:
      begin=5*(pagenum-1)
@@ -50,7 +54,7 @@ def index(request,pagenum):
         request.session['last_visit']=str(datetime.now())
         request.session['visit']=visits
     context_dict['visits']=visits
-    response=render(request,'rango/index.html',context_dict)
+    response=render(request, 'rango/index.html', context_dict)
     return response
 #     # 得到cookie值 将cookies 值提取出来加在字典中 返回给html
 #     visits=int(request.COOKIES.get('visits','1'))
@@ -91,11 +95,13 @@ def index_1(request):
     return response
 
 def about(request):
-    return render(request,'rango/about.html')
+    return render(request, 'rango/about.html')
 def category(request,cat_name_slug):
     context_dict={}
     context_dict['result_list']=None
     context_dict['query']=None
+    catlist=Category.objects.order_by('views')
+    context_dict['categories']=catlist
     if request.method=="POST":
         query=request.POST['query'].strip()
         if query:
@@ -117,7 +123,7 @@ def category(request,cat_name_slug):
         pass
     if not context_dict['query']:
         context_dict['query']=category.name
-    return render(request,'rango/category.html',context_dict)
+    return render(request, 'rango/category.html', context_dict)
 def     add_cat(request):
     if request.method=='POST':
         form=CatForm(request.POST)
@@ -133,7 +139,9 @@ def     add_cat(request):
     else:
         form=CatForm()
     #     传递给add HTML页面一个字典
-    return render(request,'rango/add_category.html',{'form':form})
+    cat_list=Category.objects.order_by('views')
+
+    return render(request, 'rango/add_category.html', {'form':form, 'categories':cat_list})
 def add_page(request,cat_name_slug):
     try:
         #根据 slug属性 找到page 的category
@@ -156,10 +164,12 @@ def add_page(request,cat_name_slug):
             print('false')
             print form.errors
     else:
-        print('新建表格')
         form=PageForm()
+
         context_dict={'form':form,'category':cat}
-    return render(request,'rango/add_Page.html',context_dict)
+    cat_list=Category.objects.order_by('views')
+    context_dict['categories']=cat_list
+    return render(request, 'rango/add_Page.html', context_dict)
 
 def register(request):
     registered=False
@@ -185,10 +195,10 @@ def register(request):
         profile_form=UserProfileForm()
     #如果不是提交请求 就跳转到注册的见面、
     #   如果是提交请求 就执行操作，写入数据库，然后跳转到注册页面 说明已经注册成功
-    return render(request,'rango/register.html',{'user_form':user_form,
+    return render(request, 'rango/register.html', {'user_form':user_form,
                                                  'profile_form':profile_form,
                                                  'registered':registered
-                                                 })
+                                                   })
 def Login(request):
     if request.method=='POST':
         print('this is post')
@@ -207,7 +217,7 @@ def Login(request):
             return HttpResponse("Invalid login details supplied.")
     else:
         print 'wrong is there'
-        return render(request,'rango/login.html',{})
+        return render(request, 'rango/login.html', {})
 
 @login_required
 def user_logout(request):
@@ -217,7 +227,7 @@ def user_logout(request):
 @login_required
 def restricted(request):
     str='if you login you can see this'
-    return render(request,'rango/restricted.html')
+    return render(request, 'rango/restricted.html')
 
 def search(request):
     result_list=[]
@@ -225,7 +235,7 @@ def search(request):
         query=request.POST['query'].strip()
         if query:
             result_list=run_query(query)
-    return render(request,'rango/search.html',{'result_list':result_list})
+    return render(request, 'rango/search.html', {'result_list':result_list})
 
 
 def Track_url(request):
@@ -276,8 +286,8 @@ def suggest_category(request):
     if request.method=="GET":
         starts_with=request.GET['suggestion']
     cat_list=get_category_list(8,starts_with)
-    return render(request,'rango/cats.html',{'cats':cat_list})
-
+    return render(request, 'rango/cats.html', {'cats':cat_list})
+#自动添加页
 def auto_add_page(request):
     cat_id=None
     url=None
@@ -294,7 +304,7 @@ def auto_add_page(request):
             pages=Page.objects.filter(category=category).order_by('-views')
             #add our results list to the template
             context_dict['pages']=pages
-    return render(request,'rango/page_list.html',context_dict)
+    return render(request, 'rango/page_list.html', context_dict)
 
 def blog(request,blog_slug):
     content_dict={}
@@ -304,7 +314,8 @@ def blog(request,blog_slug):
     content_dict['blog_slug']=contents.slug
     cat_list=Category.objects.order_by('-likes')[:5]
     content_dict['categories']=cat_list
-    return render(request,'rango/blog.html',content_dict)
+    return render(request, 'rango/blog.html', content_dict)
+#更改文章的页内容
 def change_page(request,pagenum):
     begin=(int(pagenum)-1)*5
     end=int (pagenum)*5
@@ -313,5 +324,28 @@ def change_page(request,pagenum):
     page_list = Page.objects.order_by('-views')[:5]
     # 得到cat和page 和 article的信息
     context_dict = {'categories': cat_list, 'pages': page_list, 'articles': article_list}
-    response=render(request,'rango/index.html',context_dict)
+    response=render(request, 'rango/index.html', context_dict)
     return  response
+#显示不同类别的文章
+def cat_article(request,category):
+    print('herte')
+    print(type(category))
+    print(category)
+    category=str(category)
+    print(type(category))
+    cat=Category.objects.get_or_create(name=category)
+    articles=article.objects.get_or_create(category=cat)
+    nums=article.objects.count()
+    print(nums)
+    print(type(nums))
+    page = nums / 5
+    if nums % 5 != 0:
+        page += 1
+    pages = []
+    for i in range(1, page + 1):
+        pages.append(i)
+    context_dict={}
+    context_dict['articles']=articles
+    context_dict['pages']=pages
+    return render(request, 'rango/article_cat.html', context_dict)
+
